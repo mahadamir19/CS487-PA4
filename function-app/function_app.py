@@ -13,22 +13,27 @@ async def http_starter(req: func.HttpRequest, client: df.DurableOrchestrationCli
 
 @app.orchestration_trigger(context_name="context")
 def my_orchestrator(context: df.DurableOrchestrationContext):
-    # TODO: Implement the orchestrator
-    # 1. Get the input order
-    # 2. Call validate_activity with the order
-    # 3. If invalid, return {"status": "rejected", "reason": <reason>}
-    # 4. If valid, call report_activity with the order
-    # 5. Return {"status": "completed", "report_url": <report_url>}
-    pass
+    order = context.get_input()
+    validation = yield context.call_activity("validate_activity", order)
+    
+    if not validation.get("valid"):
+        return {
+            "status": "rejected", 
+            "reason": validation.get("reason", "unknown validation error")
+        }
+    
+    report_url = yield context.call_activity("report_activity", order)
+    return {
+        "status": "completed", 
+        "report_url": report_url
+    }
 
 @app.activity_trigger(input_name="order")
 def validate_activity(order: dict) -> dict:
-    # TODO: Implement the validate activity
-    # 1. Get VALIDATE_URL from environment variables
-    # 2. Make a POST request to VALIDATE_URL with the order as JSON
-    # 3. Raise an exception if the request fails (r.raise_for_status())
-    # 4. Return the parsed JSON response
-    pass
+    validate_url = os.environ["VALIDATE_URL"]
+    response = requests.post(validate_url, json=order)
+    response.raise_for_status()
+    return response.json()
 
 @app.activity_trigger(input_name="order")
 def report_activity(order: dict) -> str:
@@ -53,36 +58,36 @@ def report_activity(order: dict) -> str:
     # Replace the `None` values below with the correct properties.
     # Hint: Follow the structure shown in the skeleton.
     
-    # group = ContainerGroup(
-    #     location=loc, os_type=OperatingSystemTypes.linux,
-    #     restart_policy=ContainerGroupRestartPolicy.never,
-    #     image_registry_credentials=[ImageRegistryCredential(
-    #         server=os.environ["ACR_SERVER"],
-    #         username=os.environ["ACR_USERNAME"],
-    #         password=os.environ["ACR_PASSWORD"])],
-    #     containers=[Container(
-    #         name="report", image=image,
-    #         resources=ResourceRequirements(
-    #             requests=ResourceRequests(cpu=1.0, memory_in_gb=1.5)),
-    #         environment_variables=[
-    #             EnvironmentVariable(name="ORDER_ID",     value=order_id),
-    #             EnvironmentVariable(name="ORDER_JSON",   value=json.dumps(order)),
-    #             EnvironmentVariable(name="STORAGE_CONN", secure_value=os.environ["STORAGE_CONN"]),
-    #         ])])
-    # 
-    # client.container_groups.begin_create_or_update(rg, name, group).result()
+    group = ContainerGroup(
+        location=loc, os_type=OperatingSystemTypes.linux,
+        restart_policy=ContainerGroupRestartPolicy.never,
+        image_registry_credentials=[ImageRegistryCredential(
+            server=os.environ["ACR_SERVER"],
+            username=os.environ["ACR_USERNAME"],
+            password=os.environ["ACR_PASSWORD"])],
+        containers=[Container(
+            name="report", image=image,
+            resources=ResourceRequirements(
+                requests=ResourceRequests(cpu=1.0, memory_in_gb=1.5)),
+            environment_variables=[
+                EnvironmentVariable(name="ORDER_ID",     value=order_id),
+                EnvironmentVariable(name="ORDER_JSON",   value=json.dumps(order)),
+                EnvironmentVariable(name="STORAGE_CONN", secure_value=os.environ["STORAGE_CONN"]),
+            ])])
+    
+    client.container_groups.begin_create_or_update(rg, name, group).result()
 
     # Poll until Succeeded (or 5 min max)
-    # for _ in range(60):
-    #     info = client.container_groups.get(rg, name)
-    #     state = info.instance_view.state if info.instance_view else None
-    #     if state in ("Succeeded", "Failed"):
-    #         break
-    #     time.sleep(5)
+    for _ in range(60):
+        info = client.container_groups.get(rg, name)
+        state = info.instance_view.state if info.instance_view else None
+        if state in ("Succeeded", "Failed"):
+            break
+        time.sleep(5)
 
     # Clean up so it stops being a visible resource
-    # client.container_groups.begin_delete(rg, name)
+    client.container_groups.begin_delete(rg, name)
 
-    # account = os.environ["STORAGE_CONN"].split(";AccountName=")[1].split(";")[0]
-    # return f"https://{account}.blob.core.windows.net/reports/{order_id}.pdf"
+    account = os.environ["STORAGE_CONN"].split(";AccountName=")[1].split(";")[0]
+    return f"https://{account}.blob.core.windows.net/reports/{order_id}.pdf"
     pass

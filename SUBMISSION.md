@@ -52,19 +52,19 @@ Public URL: pa4-27100289.azurewebsites.net
 
 ### Evidence 1.3: Deployment Center / GitHub Actions
 
-[Deployment Centre](docs/deployment_centre.png)
+![Deployment Centre](docs/deployment_centre.png)
 
 Description: This illustrates the Continuous Deployment (CI/CD) configuration linking the Azure Web App to the main branch of my GitHub fork. It demonstrates the use of a GitHub Actions workflow, authenticated via a publish profile, to automatically build the webapp/ directory and deploy the code to Azure
 
 ### Evidence 1.4: Live Web UI
 
-[Live Web UI](docs/web_app_page.png)
+![Live Web UI](docs/web_app_page.png)
 
 Description: This screenshot captures the live TaskFlow frontend accessible over HTTPS in a browser, confirming that the Node.js application was successfully built and is being served by the Azure App Service
 
 ### Evidence 1.5: App Settings
 
-[App Settings](docs/app_settings.png)
+![App Settings](docs/app_settings.png)
 
 Description: This verifies the configuration of the FUNCTION_START_URL and FUNCTION_STATUS_URL environment variables within the Azure Portal
 

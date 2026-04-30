@@ -117,9 +117,9 @@ Description: This file contains the complete Durable Function logic, demonstrati
 
 ### Evidence 3.2: Local Function Handler Listing
 
-TODO: Embed screenshot of `func start` showing the HTTP starter, orchestrator, and activities.
+TODO: ![Func Start](docs/func_start.png)
 
-Description: TODO: Explain that the Durable Functions runtime discovered your handlers.
+Description: This screenshot verifies that the local Azure Functions Core Tools successfully compiled the Python code and registered all four required Durable Function handlers (the HTTP starter, the orchestrator, and the two activity triggers) without any binding errors.
 
 ---
 

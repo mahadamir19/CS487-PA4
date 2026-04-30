@@ -15,11 +15,11 @@ Copy this file to <code style="color:#111827;background:#ddd6fe;padding:2px 4px;
 
 | Field | Value |
 |---|---|
-| Name | TODO |
-| Roll Number | TODO |
-| GitHub Repository URL | TODO |
-| Resource Group | `rg-sp26-TODO` |
-| Assigned Region | TODO: `uaenorth` or `ukwest` |
+| Name | Mahad Amir |
+| Roll Number | 27100289 |
+| GitHub Repository URL | https://github.com/mahadamir19/CS487-PA4 |
+| Resource Group | `rg-sp26-27100289` |
+| Assigned Region | `ukwest` |
 
 ## Evidence Rules
 
@@ -34,27 +34,39 @@ Copy this file to <code style="color:#111827;background:#ddd6fe;padding:2px 4px;
 
 ### Evidence 1.1: Forked Repository
 
-TODO: Embed screenshot of your forked GitHub repository.
+![Forked Repo](docs/forked-github-repo.png)
 
-Description: TODO: Explain that this is your working fork and that it contains the PA4 starter structure.
+Description: This screenshot proves the CS487-PA4 starter repository was successfully forked to my personal GitHub account, which now acts as the central source code repository and deployment trigger for the Azure Web App
 
 ### Evidence 1.2: App Service Overview
 
-TODO: Embed screenshot of the Web App overview page showing `webapp-<rollnum>` and Running status.
+![Web App Overview](docs/web_app_overview.png)
 
-Description: TODO: State the resource group, region, runtime, and public URL.
+Resource group: rg-sp26-27100289
+
+Region: UK West
+
+Runtime: Node 22 LTS (Node 20 LTS was not available on the portal, I searched it but it did not appear in the search results).
+
+Public URL: pa4-27100289.azurewebsites.net
 
 ### Evidence 1.3: Deployment Center / GitHub Actions
 
-TODO: Embed screenshot of Deployment Center or the successful GitHub Actions deployment.
+[Deployment Centre](docs/deployment_centre.png)
 
-Description: TODO: Explain how the Web App is connected to your GitHub fork.
+Description: This illustrates the Continuous Deployment (CI/CD) configuration linking the Azure Web App to the main branch of my GitHub fork. It demonstrates the use of a GitHub Actions workflow, authenticated via a publish profile, to automatically build the webapp/ directory and deploy the code to Azure
 
 ### Evidence 1.4: Live Web UI
 
-TODO: Embed screenshot of the TaskFlow page loaded in a browser.
+[Live Web UI](docs/web_app_page.png)
 
-Description: TODO: Explain that the App Service is serving the frontend successfully.
+Description: This screenshot captures the live TaskFlow frontend accessible over HTTPS in a browser, confirming that the Node.js application was successfully built and is being served by the Azure App Service
+
+### Evidence 1.5: App Settings
+
+[App Settings](docs/app_settings.png)
+
+Description: This verifies the configuration of the FUNCTION_START_URL and FUNCTION_STATUS_URL environment variables within the Azure Portal
 
 ---
 

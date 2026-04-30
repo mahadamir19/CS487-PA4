@@ -74,21 +74,36 @@ Description: This verifies the configuration of the FUNCTION_START_URL and FUNCT
 
 ### Evidence 2.1: ACR Overview
 
-TODO: Embed screenshot of `crpa4<rollnum>` overview.
+![ACR Overview](docs/acr_overview.png)
 
-Description: TODO: Identify the registry SKU and resource group.
+Description: SKU: Basic and Resource group: rg-sp26-27100289
 
 ### Evidence 2.2: Docker Builds
 
-TODO: Embed screenshot showing successful local builds for `validate-api`, `report-job`, and `func-app`.
+![Validate Image](docs/validate_api_image.png)
+![Report Image](docs/report_job_image.png)
+![Func Image](docs/function_app_image.png)
 
-Description: TODO: Explain which folder produced each image.
+Description: The validate-api:latest image was built from the ./validate-api directory, the report-job:latest image from the ./report-job directory, and the func-app:latest image from the ./function-app directory
 
-### Evidence 2.3: ACR Repositories
+### Evidence 2.3: Testing validate api
 
-TODO: Embed screenshot or CLI output showing all three repositories in ACR.
+![Test](docs/validator_test.png)
 
-Description: TODO: Confirm `validate-api:v1`, `report-job:v1`, and `func-app:v1` were pushed.
+Description: The screenshot shows a curl POST request sent to localhost:8080/validate and the container successfully returning the expected JSON response ({"valid":true}), proving the application logic functions correctly before cloud deployment
+
+### Evidence 2.4: Pushing images
+
+![Push](docs/validate_report_push.png)
+![Func Push](docs/function_app_push.png)
+
+Description: These screenshots show the local images being successfully tagged with the pa427100289.azurecr.io login server prefix and pushed to the cloud using the docker push command
+
+### Evidence 2.5: ACR Repositories
+
+![Verification](docs/verification.png)
+
+Description: This screenshot confirms that all three required container repositories—validate-api:v1, report-job:v1, and func-app:v1—were successfully published to Azure
 
 ---
 

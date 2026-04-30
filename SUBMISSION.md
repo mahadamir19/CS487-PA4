@@ -111,9 +111,9 @@ Description: This screenshot confirms that all three required container reposito
 
 ### Evidence 3.1: Completed Function Code
 
-TODO: Link to your completed file: `[function_app.py](function-app/function_app.py)`.
+[function_app.py](function-app/function_app.py)
 
-Description: TODO: Summarize how your orchestrator chains validation and report generation.
+Description: This file contains the complete Durable Function logic, demonstrating the sequential chaining of activities. The orchestrator uses the yield keyword to pause and checkpoint execution while calling validate_activity, disrupts the workflow if the order is rejected, and only proceeds to trigger report_activity if the validation is successful.
 
 ### Evidence 3.2: Local Function Handler Listing
 

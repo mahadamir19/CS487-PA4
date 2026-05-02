@@ -246,19 +246,26 @@ Description: TODO: Explain how the frontend starts and polls the Durable orchest
 
 ### Evidence 7.2: Happy Path UI
 
-TODO: Embed screenshots of the form before submit, Running status, and Completed status with report URL.
+![form](docs/form.png)
+![completed](docs/completed.png)
+![running](docs/running.png)
+![pdf](docs/pdf.png)
 
 Description: TODO: Explain the valid order payload and final result.
 
 ### Evidence 7.3: Backend Participation
 
-TODO: Embed screenshots showing Function App invocation, AKS validator evidence, ACI evidence, and Blob PDF evidence.
+![aci](docs/spawned_aci.png)
+![container](docs/container_pdf.png)
+![aks_logs](docs/aks_logs.png)
 
 Description: TODO: Trace the same order ID across services.
 
+Note: Due to the strict Azure Policy restrictions enforced within the university's lab environment, I was unable to provision an Azure Application Insights resource (or a Log Analytics Workspace). Application Insights is a strict prerequisite for the Function App's "Monitor -> Invocations" dashboard to capture and display historical execution data. Because the resource creation was blocked by policy, the Invocations UI remains unpopulated, and I cannot provide a screenshot of this specific view. However, the successful orchestration of both activities is proven by the final "Completed" state in the Web App UI and the successful generation of the PDF in the Blob container.
+
 ### Evidence 7.4: Reject Path UI
 
-TODO: Embed screenshot of an order with `qty > 100` being rejected.
+![failure](docs/failure_msg.png)
 
 Description: TODO: Explain why no report ACI should be created for this order.
 

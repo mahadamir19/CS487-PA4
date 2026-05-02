@@ -1,3 +1,5 @@
+import traceback
+
 import azure.functions as func
 import azure.durable_functions as df
 import os, json, time, requests
@@ -7,10 +9,14 @@ app = df.DFApp(http_auth_level=func.AuthLevel.FUNCTION)
 @app.route(route="orchestrators/my_orchestrator", methods=["POST"])
 @app.durable_client_input(client_name="client")
 async def http_starter(req: func.HttpRequest, client: str):
-    durable_client = df.DurableOrchestrationClient(client)
-    order = req.get_json()
-    instance_id = await durable_client.start_new("my_orchestrator", client_input=order)
-    return durable_client.create_check_status_response(req, instance_id)
+    try:
+        order = req.get_json()
+        instance_id = await client.start_new("my_orchestrator", client_input=order)
+        return client.create_check_status_response(req, instance_id)
+        
+    except Exception as e:
+        error_msg = f"FATAL CRASH TRIGGERED:\n{str(e)}\n\nTRACEBACK:\n{traceback.format_exc()}"
+        return func.HttpResponse(body=error_msg, status_code=500)
 
 @app.orchestration_trigger(context_name="context")
 def my_orchestrator(context: df.DurableOrchestrationContext):
@@ -91,4 +97,4 @@ def report_activity(order: dict) -> str:
 
     account = os.environ["STORAGE_CONN"].split(";AccountName=")[1].split(";")[0]
     return f"https://{account}.blob.core.windows.net/reports/{order_id}.pdf"
-    pass
+    # pass

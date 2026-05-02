@@ -276,9 +276,9 @@ Description: This sequence demonstrates the orchestrator's short-circuit logic. 
 
 ### Evidence 8.1: Architecture Diagram
 
-TODO: Embed your architecture diagram from `docs/`.
+![architecture](docs/27100289_architecture_diagram.png)
 
-Description: TODO: Confirm that it shows GitHub, App Service, Durable Function, AKS, ACI, Blob Storage, ACR, and IAM.
+It shows GitHub, App Service, Durable Function, AKS, ACI, Blob Storage, ACR, and IAM.
 
 ### Question 8.2: Service Selection
 

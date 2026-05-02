@@ -156,41 +156,36 @@ Description: This failure is expected at this stage because the orchestration su
 
 ## Task 5: AKS Validator (15 points)
 
-### Evidence 5.1: AKS Cluster
+### Evidence 5.1: Kubernetes Nodes
 
-TODO: Embed screenshot of AKS overview showing `aks-<rollnum>` succeeded.
+![nodes](docs/get_nodes.png)
 
-Description: TODO: State node count, node size, region, and resource group.
+Description: This screenshot shows the kubectl get nodes output, confirming that the AKS cluster is successfully provisioned and the single Standard_B2s worker node is authenticated and in a Ready state.
 
-### Evidence 5.2: Kubernetes Nodes and Pods
+### Evidence 5.2: Kubernetes Pods
 
-TODO: Embed screenshot of `kubectl get nodes` and `kubectl get pods`.
+![pods](docs/get_pods.png)
 
-Description: TODO: Explain that the validator pod is scheduled and running.
+Description: The kubectl get pods output confirms that the validate-api deployment successfully pulled the container image from the Azure Container Registry. The pod is now scheduled and actively Running on the worker node.
 
 ### Evidence 5.3: Kubernetes Service
 
-TODO: Embed screenshot of `kubectl get service validate-service`.
+![service](get_service.png)
 
-Description: TODO: Identify the external IP and port exposed by the LoadBalancer.
+Description: The kubectl get service output demonstrates that the Azure LoadBalancer successfully provisioned a public IP address (51.140.204.239) for the validate-service. This exposes the internal validator API on port 8080 to the public internet so it can receive HTTP traffic.
 
 ### Evidence 5.4: Validator API Tests
 
-TODO: Embed screenshot of `curl /health`, a valid `curl /validate`, and an invalid `curl /validate`.
+![health](docs/health.png)
+![checks](docs/validity_checks.png)
 
-Description: TODO: Explain the accepted path and the `qty > 100` rejection rule.
+Description: These curl tests verify the API's logic over the internet. The accepted path (O-1001) correctly returns {"valid": true} because the requested quantity (2) is valid. The rejected path (O-1002) correctly returns {"valid": false} and specifies the reason, because the item quantity (999) triggers the validation rule that rejects orders where qty > 100
 
 ### Evidence 5.5: Function App `VALIDATE_URL`
 
-TODO: Embed screenshot showing the Function App application setting `VALIDATE_URL`.
+![func](docs/func_app_settings.png)
 
-Description: TODO: Explain how the Durable Function reaches the AKS validator.
-
-### Evidence 5.6: AKS Idle Behavior
-
-TODO: Embed AKS metrics screenshot and/or `kubectl` output after the service is idle.
-
-Description: TODO: Explain that the AKS node remains running even when there are no orders.
+Description: This shows the Function App's configuration updated with the VALIDATE_URL. The Durable Function's validate_activity uses this exact endpoint (http://51.140.204.239:8080/validate) to securely route the order payload from the orchestrator to the AKS cluster for validation during every pipeline run
 
 ---
 

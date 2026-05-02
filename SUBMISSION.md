@@ -240,9 +240,9 @@ Application Context: (ORDER_ID, ORDER_JSON) provides the specific business data 
 
 ### Evidence 7.1: Web App Wiring
 
-TODO: Embed screenshot showing `FUNCTION_START_URL` and `FUNCTION_STATUS_URL` configured on the Web App.
+![web](docs/web_config.png)
 
-Description: TODO: Explain how the frontend starts and polls the Durable orchestration.
+Description: The frontend utilizes the asynchronous HTTP API pattern required by Azure Durable Functions. When a user submits an order, the Web App sends an HTTP POST request to the http_starter function. The Function App immediately returns an HTTP 202 (Accepted) response containing management endpoints, including a statusQueryGetUri. The frontend's JavaScript then actively polls this status URI at regular intervals, updating the UI state based on the runtimeStatus until it reads Completed or Failed.
 
 ### Evidence 7.2: Happy Path UI
 
@@ -251,7 +251,7 @@ Description: TODO: Explain how the frontend starts and polls the Durable orchest
 ![running](docs/running.png)
 ![pdf](docs/pdf.png)
 
-Description: TODO: Explain the valid order payload and final result.
+Description: This sequence demonstrates a successful end-to-end execution. A valid order payload (with a quantity well below the threshold of 100) is submitted via the form. The UI correctly transitions to a "Running" state, displaying the unique orchestration instance ID while polling the backend. Once the orchestration finishes, the UI updates to "Completed" and dynamically renders the direct blob storage URL. The final downloaded PDF confirms the data payload was accurately passed from the frontend all the way to the reporting container.
 
 ### Evidence 7.3: Backend Participation
 
@@ -259,7 +259,7 @@ Description: TODO: Explain the valid order payload and final result.
 ![container](docs/container_pdf.png)
 ![aks_logs](docs/aks_logs.png)
 
-Description: TODO: Trace the same order ID across services.
+Description: By tracing a specific Order ID through the system logs, we verify the distributed participation of all microservices. First, the AKS pod logs confirm that the validate_activity successfully routed the traffic to the cluster, which parsed and validated the payload. Following validation, the az container list output proves the orchestrator dynamically provisioned a temporary ACI (ci-report-[order_id]) to execute the report_activity. Finally, the storage container view confirms the ACI successfully completed its job by writing the PDF to Blob Storage before being deleted.
 
 Note: Due to the strict Azure Policy restrictions enforced within the university's lab environment, I was unable to provision an Azure Application Insights resource (or a Log Analytics Workspace). Application Insights is a strict prerequisite for the Function App's "Monitor -> Invocations" dashboard to capture and display historical execution data. Because the resource creation was blocked by policy, the Invocations UI remains unpopulated, and I cannot provide a screenshot of this specific view. However, the successful orchestration of both activities is proven by the final "Completed" state in the Web App UI and the successful generation of the PDF in the Blob container.
 
@@ -267,7 +267,7 @@ Note: Due to the strict Azure Policy restrictions enforced within the university
 
 ![failure](docs/failure_msg.png)
 
-Description: TODO: Explain why no report ACI should be created for this order.
+Description: This sequence demonstrates the orchestrator's short-circuit logic. An invalid order (e.g., quantity > 100) is submitted, which causes the AKS validator to return a valid: false response. The Durable Orchestrator evaluates this result and immediately halts execution, returning a "rejected" status to the polling Web App. Because the workflow exits early, the report_activity is never invoked. This prevents the unnecessary provisioning of an ACI and saves compute costs, proving the orchestration handles business logic failures gracefully.
 
 ---
 

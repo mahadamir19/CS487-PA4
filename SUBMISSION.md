@@ -269,6 +269,7 @@ Note: Due to the strict Azure Policy restrictions enforced within the university
 
 Description: This sequence demonstrates the orchestrator's short-circuit logic. An invalid order (e.g., quantity > 100) is submitted, which causes the AKS validator to return a valid: false response. The Durable Orchestrator evaluates this result and immediately halts execution, returning a "rejected" status to the polling Web App. Because the workflow exits early, the report_activity is never invoked. This prevents the unnecessary provisioning of an ACI and saves compute costs, proving the orchestration handles business logic failures gracefully.
 
+
 ---
 
 ## Task 8: Write-up and Architecture Diagram (5 points)
@@ -281,24 +282,50 @@ Description: TODO: Confirm that it shows GitHub, App Service, Durable Function, 
 
 ### Question 8.2: Service Selection
 
-TODO: In 3-4 sentences each, explain why TaskFlow uses App Service, Durable Functions, AKS, and ACI for their specific roles.
+App Service
+TaskFlow uses App Service to host the frontend web interface because it provides a fully managed Platform-as-a-Service (PaaS) environment optimized for web applications. It abstracts away underlying server maintenance and provides built-in HTTPS, load balancing, and scaling. This allows the system to reliably serve the HTML/JS frontend to users without requiring infrastructure management.
+
+Durable Functions
+Durable Functions acts as the central stateful orchestrator for the backend workflow. It allows the system to reliably coordinate asynchronous API calls (AKS validation and ACI provisioning) while automatically managing execution state and retries. Because it is serverless, it can "sleep" while waiting for the ACI job to finish without consuming active compute resources or holding open HTTP connections.
+
+AKS (Azure Kubernetes Service)
+AKS is utilized for the order validation microservice because it provides an always-on, highly available environment. The validator requires continuous uptime and instant response capabilities to process incoming HTTP requests from the orchestrator without cold starts. Kubernetes allows this API to be resilient and easily scalable if validation traffic spikes.
+
+ACI (Azure Container Instances)
+ACI is used for the PDF report generation because it is perfectly suited for ephemeral, isolated batch jobs. Instead of running a heavy reporting container 24/7, ACI allows the orchestrator to dynamically spin up compute on-demand strictly for the duration of the PDF rendering. Once the file is uploaded to blob storage, the container terminates, ensuring resources are freed immediately.
 
 ### Question 8.3: ACI vs AKS
 
-TODO: Compare idle behavior, cost behavior, and operational model for AKS and ACI using your screenshots.
+Idle Behavior:
+AKS remains running continuously ("always on"), with its pods and underlying nodes idling while waiting for incoming HTTP traffic. In contrast, ACI completely terminates when its execution finishes, meaning it does not exist in an idle state; it is either actively running a job or deleted.
+
+Cost Behavior:
+Because AKS requires persistent virtual machines to host its node pool, it incurs continuous hourly compute charges regardless of whether the validator is processing orders. ACI utilizes a serverless consumption model, meaning costs are strictly tied to per-second billing for the exact CPU and memory used during the brief lifespan of the report generation.
+
+Operational Model:
+AKS requires managing complex cluster infrastructure, including node pools, deployments, and routing manifests, making it ideal for persistent microservices. ACI operates on a serverless container model where Azure abstracts away orchestration entirely, allowing developers to execute a single, isolated container image via an API call without managing the underlying host.
 
 ### Question 8.4: Durable Functions vs Plain HTTP
 
-TODO: Explain at least two problems that Durable Functions solves for this sequential workflow.
+Handling Long-Running Processes: A plain HTTP request would time out or drop the connection while waiting minutes for the ACI container to pull its image, boot, and generate the PDF. Durable Functions solves this by implementing an async polling pattern (returning a 202 Accepted immediately) so the Web App can safely check the status without keeping a fragile network connection open.
+
+State and Control Flow Management: Coordinating a multi-step workflow using plain HTTP requires building complex custom logic to handle retries, store intermediate states, and manage failures. Durable Functions solves this by natively providing an orchestration context (e.g., yield context.call_activity()), making it easy to write sequential code that automatically tracks history and can elegantly short-circuit if an earlier step (like the AKS validation) fails.
 
 ### Question 8.5: Cost Review
 
-TODO: Embed Cost Management screenshot scoped to your resource group.
+![rg](docs/resource_group.png)
 
-Description: TODO: Identify the most expensive resource and explain why.
+Description: The most expensive resource in the deployment is the Azure Kubernetes Service (AKS) node pool. This is because AKS requires dedicated, always-on Virtual Machines to run the Kubernetes control plane components and the worker nodes hosting the validator pods. Unlike the serverless resources (Durable Functions, ACI) which only bill per execution, or the basic App Service plan, the AKS nodes incur continuous hourly compute compute charges 24/7, regardless of how much traffic the system is actually handling.
 
 ### Question 8.6: Challenges Faced
 
-TODO: Describe at least two real issues you hit and how you debugged them.
+Challenge 1: Azure Policy Deadlock with Storage Authentication
+During the implementation of the report_activity, the ACI container repeatedly failed to upload the generated PDF to Blob Storage. Initially, attempting to authenticate using the storage account connection string resulted in a KeyBasedAuthenticationNotPermitted error because the university's Azure Policy strictly disables Shared Key access. I then attempted to use a Managed Identity, but hit a secondary policy block: my student subscription lacked the RBAC permissions (User Access Administrator) required to assign the Storage Blob Data Contributor role to the identity.
+
+Resolution: To debug and bypass this policy deadlock, I pivoted to using a User Delegation SAS token. I utilized the Azure CLI (az storage container generate-sas --as-user) to generate a temporary SAS token, which already had the necessary data plane permissions. I then injected this SAS_TOKEN and the STORAGE_ACCOUNT_URL into the ACI as environment variables, allowing the containerized Python script to securely authenticate and write the PDF.
+Challenge 2: Durable Functions Route Registration Failure (404 Cannot POST)
+While wiring the frontend to the backend orchestrator, the Web App consistently returned a Cannot POST /api/orchestrators/my_orchestrator (404 Not Found) error. This indicated that the Azure Functions host was up, but the specific route didn't exist.
+
+Resolution: I debugged this by wrapping the http_starter function in a try catch block, which revealed that the host was crashing during startup and failing to index my functions. The root cause was a subtle type-hinting error in my function_app.py code. The HTTP starter function was defined as async def http_starter(req: func.HttpRequest, client: str):. In the Python V2 model, the Durable Functions extension expects to inject a complex DurableOrchestrationClient object. Forcing the type hint to str caused the underlying binding reflection to fail, preventing the function from ever registering its HTTP route. By simply removing the : str type hint, the host successfully initialized the function, and the orchestrator was able to accept the POST request.
 
 ---

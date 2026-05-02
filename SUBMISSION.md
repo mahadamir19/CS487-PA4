@@ -193,39 +193,46 @@ Description: This shows the Function App's configuration updated with the VALIDA
 
 ### Evidence 6.1: Blob Container
 
-TODO: Embed screenshot of the `reports` blob container.
+![container](docs/container.png)
 
-Description: TODO: Explain where generated PDFs are stored.
+Description: The generated PDF reports are stored in a dedicated blob container named reports within the Azure Storage Account (pa427100289). This container acts as the final destination for the "ephemeral" ACI job, providing persistent storage for reports that would otherwise be lost when the container instance terminates.
 
 ### Evidence 6.2: Manual ACI Run
 
-TODO: Embed screenshot of `az container show` for `ci-report-test`.
+![success](docs/pdf_success.png)
 
-Description: TODO: State the final container state and why the job exits.
+Description: The final state of the container is terminated (succeeded). Because the ACI was configured with a RestartPolicy of Never, it does not attempt to reboot after the Python script finishes its execution. This is intentional for "task-based" workloads that perform a single job and then shut down to save costs.
 
 ### Evidence 6.3: ACI Logs
 
-TODO: Embed screenshot of `az container logs`.
+![success](docs/pdf_success.png)
 
-Description: TODO: Explain what the report job printed after generating and uploading the PDF.
+Description: The logs show the Python runtime successfully initializing, generating the PDF, and then outputting the confirmation message: Successfully uploaded [ORDER_ID.pdf to reports container.
 
 ### Evidence 6.4: Generated PDF
 
-TODO: Embed screenshot showing `TEST-001.pdf` in Blob Storage or opened from Blob Storage.
+![success](docs/pdf_success.png)
 
-Description: TODO: Explain how this proves the ACI wrote to storage.
+Description: The presence of the file in the Azure Portal's Storage Explorer proves that the ACI successfully bridged the network and security gap. It demonstrates that the container had the necessary write permissions to perform the operation against the storage service.
 
 ### Evidence 6.5: Function App Managed Identity and IAM
 
-TODO: Embed screenshots of system-assigned identity enabled and Contributor role assignment on your resource group.
+![identity](docs/managed_identity.png)
 
-Description: TODO: Explain why the Function App needs this permission to create ACIs.
+Description: The Function App requires the Contributor (or a custom ACI-specific) role at the Resource Group scope. This is because the Function App acts as an orchestrator; it must have permission to programmatically "create" and "delete" other Azure resources (the ACI instances) via the Azure Resource Manager (ARM) API.
 
 ### Evidence 6.6: Report App Settings
 
-TODO: Embed screenshot of `REPORT_*`, `ACR_*`, `STORAGE_CONN`, and `SUBSCRIPTION_ID` settings.
+![envvar1](docs/envvar_1.png)
+![envvar2](docs/envvar_2.png)
 
-Description: TODO: Explain what each group of settings is used for. Mask secrets.
+Description: The environment variables are split into three functional groups:
+
+Registry Auth: (ACR_USER, ACR_PASS) used by the ACI host to pull the private image from the Azure Container Registry.
+
+Infrastructure Target: (STORAGE_ACCOUNT_URL, STORAGE_CONN) defines where the container should upload the final report.
+
+Application Context: (ORDER_ID, ORDER_JSON) provides the specific business data the container needs to render the content of the PDF.
 
 ---
 

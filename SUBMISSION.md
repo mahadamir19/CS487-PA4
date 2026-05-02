@@ -130,7 +130,7 @@ There was a naming conflict for the function app so I named to to pa4-func-27100
 
 ### Evidence 4.1: Function App Container Configuration
 
-![error](container/container_image.png)
+![container](docs/container_image.png)
 
 Description: TODO: Function app name: pa4-func-27100289 and image URI: pa427100289.azurecr.io/func-app:v1
 
@@ -170,7 +170,7 @@ Description: The kubectl get pods output confirms that the validate-api deployme
 
 ### Evidence 5.3: Kubernetes Service
 
-![service](get_service.png)
+![service](docs/get_service.png)
 
 Description: The kubectl get service output demonstrates that the Azure LoadBalancer successfully provisioned a public IP address (51.140.204.239) for the validate-service. This exposes the internal validator API on port 8080 to the public internet so it can receive HTTP traffic.
 

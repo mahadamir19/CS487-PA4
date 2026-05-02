@@ -132,25 +132,25 @@ There was a naming conflict for the function app so I named to to pa4-func-27100
 
 ![error](container/container_image.png)
 
-Description: TODO: State the Function App name and image URI.
+Description: TODO: Function app name: pa4-func-27100289 and image URI: pa427100289.azurecr.io/func-app:v1
 
 ### Evidence 4.2: Functions List
 
 ![functions](docs/functions_list.png)
 
-Description: TODO
+Description: This screenshot confirms that the container deployed successfully and the Azure Functions runtime recognized the four required Durable Function components: http_starter, my_orchestrator, validate_activity, and report_activity
 
 ### Evidence 4.3: Orchestration Smoke Test
 
 ![curl](docs/curl_output.png)
 
-Description: TODO: Explain what the returned `id` and `statusQueryGetUri` prove.
+Description: The returned id and statusQueryGetUri prove that the http_starter function successfully received the curl POST request, authenticated using the function key, and correctly initialized a new instance of the Durable Orchestrator (my_orchestrator). It also confirms that the Function App is properly connected to its underlying Azure Storage account to track orchestration state.
 
 ### Evidence 4.4: Expected Failed Status Before Downstream Wiring
 
 ![failure](docs/uri_json.png)
 
-Description: TODO: Explain why this failure is expected at this stage.
+Description: This failure is expected at this stage because the orchestration successfully started and moved to the first activity (validate_activity), which attempts to make an HTTP call to the VALIDATE_URL. Since the Azure Kubernetes Service (AKS) validator microservice is not deployed and wired up until Task 5, the network call fails, causing the orchestration to correctly checkpoint as Failed.
 
 ---
 

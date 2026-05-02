@@ -125,21 +125,30 @@ Description: This screenshot verifies that the local Azure Functions Core Tools 
 
 ## Task 4: Function App Container Deployment (8 points)
 
+![error](docs/error.png)
+There was a naming conflict for the function app so I named to to pa4-func-27100289
+
 ### Evidence 4.1: Function App Container Configuration
 
-TODO: Embed screenshot showing the Function App uses your `func-app:v1` image from ACR.
+![error](container/container_image.png)
 
 Description: TODO: State the Function App name and image URI.
 
-### Evidence 4.2: Orchestration Smoke Test
+### Evidence 4.2: Functions List
 
-TODO: Embed screenshot of the `curl` output that starts an orchestration and returns status URLs.
+![functions](docs/functions_list.png)
+
+Description: TODO
+
+### Evidence 4.3: Orchestration Smoke Test
+
+![curl](docs/curl_output.png)
 
 Description: TODO: Explain what the returned `id` and `statusQueryGetUri` prove.
 
-### Evidence 4.3: Expected Failed Status Before Downstream Wiring
+### Evidence 4.4: Expected Failed Status Before Downstream Wiring
 
-TODO: Embed screenshot of the status query JSON showing the expected failure before `VALIDATE_URL` is configured.
+![failure](docs/uri_json.png)
 
 Description: TODO: Explain why this failure is expected at this stage.
 
